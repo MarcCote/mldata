@@ -1,17 +1,41 @@
-# -*- coding: utf-8 -*-
+"""Datasets store the data used for experiments."""
 
 
-class Dataset(list):
-    info = {}
+class Dataset():
+    """The abstract superclass of every types of datasets used in MLData
 
-    def __init__(self, data=[]):
-        super(Dataset, self).__init__(data)
+    A `Dataset` presents a unified access to data, independent of the
+     implementation details such as laziness.
 
+    Parameters
+    ----------
+    data : array_like
+    meta_data : MetaData
 
-class LazyDataset(Dataset):
-    def __init__(self, lazy_functions):
-        super(LazyDataset, self).__init__()
-        self.lazy_functions = lazy_functions
+    Attributes
+    ----------
+    data : array_like
+        The array of data to train on.
+    meta_data : Metadata
+        Information about the data. See `MetaData` documentation for more info.
+    """
+    def __init__(self, data, meta_data):
+        self.data = data
+        assert isinstance(meta_data, Metadata)
+        self.meta_data = meta_data
 
     def __iter__(self):
-        return self.lazy_functions['__iter__']()
+        raise NotImplementedError
+
+    def __getitem__(self, item):
+        raise NotImplementedError
+
+    def get_splits(self):
+        pass
+
+    def build(self): # Replace with constructor ?
+        pass
+
+    def apply(self):
+        pass
+
