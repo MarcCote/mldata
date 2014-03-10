@@ -71,3 +71,44 @@ class Metadata():
         self.dictionary = None
         self.splits = ()
         self.preprocess = None
+
+
+class InMemoryDataset(Dataset):
+    """Build a dataset entirely contained in memory.
+
+    Load the data (an array-like object) in memory. Random access is then
+    insured to be fast.
+
+    Parameters
+    ----------
+    examples : array_like
+        The dataset.
+    meta_data : Metadata
+        The metadata of this dataset.
+    targets : ?
+
+    See Also
+    --------
+    Dataset : The parent class defining the interface of a dataset.
+
+    """
+    def __init__(self, examples, meta_data, targets=None):
+        super(InMemoryDataset, self).__init__(meta_data)
+
+        self.data = examples
+
+        if targets is None:
+            self.__iter__ = self._iter_without_target
+        else:
+            self.targets = targets
+            self.__iter__ = self._iter_with_target
+
+
+    def __getitem__(self, item):
+        pass
+
+    def _iter_with_target(self):
+        pass
+
+    def _iter_without_target(self):
+        pass
