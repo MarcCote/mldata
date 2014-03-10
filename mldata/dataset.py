@@ -39,3 +39,35 @@ class Dataset():
     def apply(self):
         pass
 
+
+class Metadata():
+    """Keep track of information about a dataset.
+
+    An instance of this class is required to build a `Dataset`. It gives
+    information on how the dataset is called, the split, etc.
+
+    A single `Dataset` can have multiple metadata files specifying different
+    split or a special pre-processing that needs to be applied. The
+    philosophy is to have a single physical copy of the dataset with
+    different views that can be created on the fly as needed.
+
+    Attributes
+    ----------
+    name : str
+        The name of the `Dataset`
+    nb_examples : int
+        The number of example in the dataset (including all splits).
+    dictionary : dict
+        Gives a mapping of words (str) to id (int). Used only when the
+        dataset has been saved as an array of numbers instead of text.
+    splits : tuple of int
+        Specifies the split used by this view of the dataset.
+    preprocess : function or None
+        A function that is callable on a `Dataset` to preprocess the data.
+    """
+    def __init__(self):
+        self.name = "Default"
+        self.nb_examples = 0
+        self.dictionary = None
+        self.splits = ()
+        self.preprocess = None
