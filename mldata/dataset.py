@@ -57,7 +57,7 @@ class Metadata():
         The name of the `Dataset`
     nb_examples : int
         The number of example in the dataset (including all splits).
-    dictionary : dict
+    dictionary : Dictionary
         Gives a mapping of words (str) to id (int). Used only when the
         dataset has been saved as an array of numbers instead of text.
     splits : tuple of int
@@ -115,3 +115,24 @@ class InMemoryDataset(Dataset):
 
     def _iter_without_target(self):
         pass
+
+
+class Dictionary:
+    """Word / integer association list
+
+    This dictionary is used in `Metadata` for NLP problems. This class
+    ensures O(1) conversion from id to word and O(log n) conversion from word to
+    id.
+
+    Notes
+    -----
+    The class is *not yet implemented*.
+
+    Plans are for the dictionary to be implemented as a list of words
+    alphabetically ordered with the index of the word being its id. A method
+    implements a binary search over the words in order to retrieve its id.
+    """
+
+    def __init__(self):
+        raise NotImplementedError("The class Dictionary is not yet "
+                                  "implemented.")
