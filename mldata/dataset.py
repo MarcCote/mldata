@@ -35,14 +35,42 @@ class Dataset():
     def __getitem__(self, item):
         raise NotImplementedError("Dataset is an abstract class.")
 
-    def get_splits(self):
-        pass
+    def __len__(self):
+        return self.meta_data.nb_examples
 
-    def build(self): # Replace with constructor ?
-        pass
+    def get_splits(self):
+        """Return the splits defined by the associated metadata.
+
+        The split is given via a tuple of integer with each integers
+        representing the integer after the last id used by this split. For
+        example::
+
+            (5000, 6000, 7000)
+
+        would give a test set of all examples from 0 to 4999, a validation
+        set of examples 5000 to 5999 and a test set of examples 6000 up to
+        6999. This means that 7000 is also the number of examples in the
+        dataset.
+
+        Returns
+        -------
+        tuple of int
+            Where each integer gives the id of the example coming after the
+            last one in a split.
+        """
+        return self.meta_data.splits
 
     def apply(self):
-        pass
+        """Apply the preprocess specified in the associated metadata.
+
+        This methods simply apply the function given in the metadata (the
+        identity by default) to the dataset. This function is supposed to do
+        work on the data and the targets, leaving the rest intact. Still,
+        as long as the result is still a `Dataset`, `apply` will work.
+        """
+        ds = self.meta_data.preprocess(self)
+        assert isinstance(ds, Dataset)
+        self = ds
 
 
 class Metadata():
@@ -77,7 +105,7 @@ class Metadata():
         self.nb_examples = 0
         self.dictionary = None
         self.splits = ()
-        self.preprocess = None
+        self.preprocess = lambda x: x
         self.version = 0
 
 
