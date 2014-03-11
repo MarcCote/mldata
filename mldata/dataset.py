@@ -64,6 +64,8 @@ class Metadata():
         Specifies the split used by this view of the dataset.
     preprocess : function or None
         A function that is callable on a `Dataset` to preprocess the data.
+    version : int
+        The version number of the dataset that is required.
     """
     def __init__(self):
         self.name = "Default"
@@ -71,6 +73,7 @@ class Metadata():
         self.dictionary = None
         self.splits = ()
         self.preprocess = None
+        self.version = 0
 
 
 class InMemoryDataset(Dataset):
