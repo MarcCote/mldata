@@ -9,26 +9,31 @@ class Dataset():
 
     Parameters
     ----------
+    meta_data : Metadata
     data : array_like
-    meta_data : MetaData
+    target : array_like
 
     Attributes
     ----------
-    data : array_like
-        The array of data to train on.
     meta_data : Metadata
         Information about the data. See `MetaData` documentation for more info.
+    data : array_like
+        The array of data to train on.
+    target : array_like, optional
+        The array of target to use for supervised learning. `target` should
+        be `None` when the dataset doesn't support supervised learning.
     """
-    def __init__(self, data, meta_data):
+    def __init__(self, meta_data, data, target=None):
         self.data = data
+        self.target = target
         assert isinstance(meta_data, Metadata)
         self.meta_data = meta_data
 
     def __iter__(self):
-        raise NotImplementedError
+        raise NotImplementedError("Dataset is an abstract class.")
 
     def __getitem__(self, item):
-        raise NotImplementedError
+        raise NotImplementedError("Dataset is an abstract class.")
 
     def get_splits(self):
         pass
@@ -84,26 +89,24 @@ class InMemoryDataset(Dataset):
 
     Parameters
     ----------
-    examples : array_like
-        The dataset.
     meta_data : Metadata
         The metadata of this dataset.
-    targets : ?
+    examples : array_like
+        The dataset.
+    targets : array_like, optional
+        The targets used for the examples. If there is no target, `None`
+        should be used instead.
 
     See Also
     --------
     Dataset : The parent class defining the interface of a dataset.
-
     """
-    def __init__(self, examples, meta_data, targets=None):
-        super(InMemoryDataset, self).__init__(meta_data)
-
-        self.data = examples
+    def __init__(self, meta_data, examples, targets=None):
+        super(InMemoryDataset, self).__init__(meta_data, examples, targets)
 
         if targets is None:
             self.__iter__ = self._iter_without_target
         else:
-            self.targets = targets
             self.__iter__ = self._iter_with_target
 
 
