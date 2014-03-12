@@ -2,7 +2,7 @@
 
 
 class Dataset():
-    """The abstract superclass of every types of datasets used in MLData
+    """Interface to interact with physical dataset
 
     A `Dataset` presents a unified access to data, independent of the
      implementation details such as laziness.
@@ -29,14 +29,28 @@ class Dataset():
         assert isinstance(meta_data, Metadata)
         self.meta_data = meta_data
 
-    def __iter__(self):
-        raise NotImplementedError("Dataset is an abstract class.")
-
-    def __getitem__(self, item):
-        raise NotImplementedError("Dataset is an abstract class.")
+        if targets is None:
+            self.__iter__ = self._iter_without_target
+            self.__getitem__ = self._get_with_target
+        else:
+            self.__iter__ = self._iter_with_target
+            self.__getitem__ = self._get_without_target
 
     def __len__(self):
         return self.meta_data.nb_examples
+
+    def _iter_with_target(self):
+        pass
+
+    def _get_with_target(self, key):
+        pass
+
+    def _iter_without_target(self):
+        pass
+
+    def _get_without_target(self, key):
+        pass
+
 
     def get_splits(self):
         """Return the splits defined by the associated metadata.
@@ -115,45 +129,6 @@ class Metadata():
         self.splits = ()
         self.preprocess = lambda x: x
         self.version = 0
-
-
-class InMemoryDataset(Dataset):
-    """Build a dataset entirely contained in memory.
-
-    Load the data (an array-like object) in memory. Random access is then
-    insured to be fast.
-
-    Parameters
-    ----------
-    meta_data : Metadata
-        The metadata of this dataset.
-    examples : array_like
-        The dataset.
-    targets : array_like, optional
-        The targets used for the examples. If there is no target, `None`
-        should be used instead.
-
-    See Also
-    --------
-    Dataset : The parent class defining the interface of a dataset.
-    """
-    def __init__(self, meta_data, examples, targets=None):
-        super(InMemoryDataset, self).__init__(meta_data, examples, targets)
-
-        if targets is None:
-            self.__iter__ = self._iter_without_target
-        else:
-            self.__iter__ = self._iter_with_target
-
-
-    def __getitem__(self, item):
-        pass
-
-    def _iter_with_target(self):
-        pass
-
-    def _iter_without_target(self):
-        pass
 
 
 class Dictionary:
