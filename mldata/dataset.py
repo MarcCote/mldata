@@ -22,6 +22,7 @@ class Dataset():
     target : array_like, optional
         The array of target to use for supervised learning. `target` should
         be `None` when the dataset doesn't support supervised learning.
+
     """
     def __init__(self, meta_data, data, target=None):
         self.data = data
@@ -38,19 +39,6 @@ class Dataset():
 
     def __len__(self):
         return self.meta_data.nb_examples
-
-    def _iter_with_target(self):
-        pass
-
-    def _get_with_target(self, key):
-        pass
-
-    def _iter_without_target(self):
-        pass
-
-    def _get_without_target(self, key):
-        pass
-
 
     def get_splits(self):
         """Return the splits defined by the associated metadata.
@@ -76,10 +64,11 @@ class Dataset():
         -----
         For now, only a tuple is accepted. Eventually, predicates over the
         examples id could be supported.
+
         """
         if isinstance(self.meta_data.splits, tuple):
             return self.meta_data.splits
-        else
+        else:
             raise NotImplementedError("Only splits with tuple are supported.")
 
     def apply(self):
@@ -89,10 +78,59 @@ class Dataset():
         identity by default) to the dataset. This function is supposed to do
         work on the data and the targets, leaving the rest intact. Still,
         as long as the result is still a `Dataset`, `apply` will work.
+
         """
         ds = self.meta_data.preprocess(self)
         assert isinstance(ds, Dataset)
         self = ds
+
+    def _iter_with_target(self):
+        """Provide an iterator when the Dataset has a target."""
+        for (ex, tg) in zip(self.data, self.targets):
+            yield (ex, tg)
+
+    def _get_with_target(self, key):
+        """Get the entry specified by the key.
+
+        Parameters
+        ----------
+        key : numpy-like key
+            The `key` can be a single integer, a slice or a tuple defining
+            coordinates. Can be treated as a NumPy key.
+
+        Returns
+        -------
+        (array_like, array_like)
+            Return the element specified by the key. It can be an array or
+            simply a scalar of the type defined by the data and target arrays.
+            The returned values are put in a tuple (data, target).
+
+        """
+        return (self.data[key], self.target[key])
+
+    def _iter_without_target(self):
+        """Provide an iterator when the Dataset has no target."""
+        for ex in self.data:
+            yield (ex,)
+
+    def _get_without_target(self, key):
+        """Get the entry specified by the key.
+
+        Parameters
+        ----------
+        key : numpy-like key
+            The `key` can be a single integer, a slice or a tuple defining
+            coordinates. Can be treated as a NumPy key.
+
+        Returns
+        -------
+        (array_like, )
+            Return the element specified by the key. It can be an array or
+            simply a scalar of the type defined by the data and target arrays.
+            The returned values are put in a tuple (data, ).
+
+        """
+        return (self.data[key],)
 
 
 class Metadata():
@@ -121,6 +159,7 @@ class Metadata():
         A function that is callable on a `Dataset` to preprocess the data.
     version : int
         The version number of the dataset that is required.
+
     """
     def __init__(self):
         self.name = "Default"
@@ -145,6 +184,7 @@ class Dictionary:
     Plans are for the dictionary to be implemented as a list of words
     alphabetically ordered with the index of the word being its id. A method
     implements a binary search over the words in order to retrieve its id.
+
     """
 
     def __init__(self):
