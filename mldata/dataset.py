@@ -57,8 +57,16 @@ class Dataset():
         tuple of int
             Where each integer gives the id of the example coming after the
             last one in a split.
+
+        Notes
+        -----
+        For now, only a tuple is accepted. Eventually, predicates over the
+        examples id could be supported.
         """
-        return self.meta_data.splits
+        if isinstance(self.meta_data.splits, tuple):
+            return self.meta_data.splits
+        else
+            raise NotImplementedError("Only splits with tuple are supported.")
 
     def apply(self):
         """Apply the preprocess specified in the associated metadata.
