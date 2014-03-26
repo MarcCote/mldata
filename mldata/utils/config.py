@@ -1,38 +1,95 @@
 import configparser
+import os
 from os.path import expanduser
 
+from shutil import rmtree
 
-def create_default_config():
-    """ Build and save a default config file for MLData.
+CONFIGFILE = expanduser("~")+'.mldataConfig'
 
-    The default config is saved as ``.MLDataConfig`` in the ``$HOME`` folder
-    or its equivalent. The only thing present in the config file is a list of
-    path of folders where datasets are stored.
+def add_dataset(dataset_name):
+    """ Add a dataset to the index."""
 
+    path = os.path.join(_load_path(), dataset_name)
+
+    if not os.path.isdir(path):
+        os.mkdir(path)
+
+    cp = _load_config()
+    cp['datasets'][dataset_name] = path
+    _save_config(cp)
+
+def remove_dataset(dataset_name):
+    """ Remove a dataset from the index."""
+    path = os.path.join(_load_path(), dataset_name)
+
+    if os.path.isdir(path): # Does path exist ?
+        rmtree(path, ignore_errors=True)
+
+    cp = _load_config()
+    cp.remove_option('datasets', dataset_name)
+    _save_config(cp)
+
+def get_dataset_path(dataset_name):
+    """ Retreive the dataset path.
+
+    Parameters
+    ----------
+    dataset_name : str
+        Name of a dataset
+
+    Returns
+    -------
+    str
+        The string of the path where ``dataset_name`` is saved.
+
+    Raises
+    ------
+    KeyError
+        If the path specified in the config file does not exist in the system.
     """
-    cp = configparser.ConfigParser()
-    cp['datasets'] = {'paths': '[' + expanduser("~")+'/.datasets' + ']'}
-    save(cp)
+    cp = _load_config()
+    path = cp['datasets'][dataset_name]
+    if not os.path.isdir(path):
+        raise KeyError("Wrong path in .mldataConfig.")
+    else:
+        return path
 
-
-def save(config):
+def _save_config(config):
     """ Save a config file in the default config file emplacement."""
     config.write(expanduser("~")+'.mldataConfig')
 
 
-def load_paths():
+def _load_config():
+    """ Loads the configuration file for MLData."""
+    if not os.path.exists(CONFIGFILE):
+        _create_default_config()
+    return configparser.ConfigParser().read(CONFIGFILE)
+
+def _create_default_config():
+    """ Build and save a default config file for MLData.
+
+    The default config is saved as ``.MLDataConfig`` in the ``$HOME`` folder
+    or its equivalent. It stores the emplacement of dataset files and make an
+    index of accessible datasets.
+
+    """
+    cp = configparser.ConfigParser()
+    cp['config'] = {'path': expanduser("~")+'/.datasets'}
+    cp['datasets'] = {}
+    _save_config(cp)
+    with open(CONFIGFILE, 'a') as f:
+        f.write("# Datasets path shouldn't be changed manually.")
+
+def _load_path():
     """ Load the config file at the default emplacement.
 
     Returns
     -------
-    [str]
+    str
         A list of strings giving the paths to dataset folders.
 
     """
-    cp = configparser.ConfigParser()
-    cp.read(expanduser("~")+'.mldataConfig')
-    l = cp['datasets']['paths']
-    assert isinstance(eval(l), list), "The paths " + l + " is not a list."
-    assert all(isinstance(e, str) for e in eval(l)), "Elements of the list" +\
-                                                     l + " are not strings."
-    return eval(l)
+    cp = _load_config()
+    path = cp['config']['path']
+    assert os.path.isdir(path), "Configured path is not a valid directory."
+    return path
