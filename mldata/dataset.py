@@ -1,5 +1,5 @@
 """Datasets store the data used for experiments."""
-
+import hashlib
 
 class Dataset():
     """Interface to interact with physical dataset
@@ -39,6 +39,14 @@ class Dataset():
 
     def __len__(self):
         return self.meta_data.nb_examples
+
+    def __hash__(self):
+        """ Hash function used for versioning."""
+        hasher = hashlib.md5()
+        hasher.update(self.data)
+        if self.target is not None:
+            hasher.update(self.target)
+        return hasher.hexdigest()[:8]
 
     def get_splits(self):
         """Return the splits defined by the associated metadata.
