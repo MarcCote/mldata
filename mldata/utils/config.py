@@ -54,6 +54,10 @@ def get_dataset_path(dataset_name):
     else:
         return path
 
+def dataset_exists(dataset_name):
+    """ Check if the dataset exists."""
+    return _load_config().has_option('datasets', dataset_name)
+
 def _save_config(config):
     """ Save a config file in the default config file emplacement."""
     config.write(expanduser("~")+'.mldataConfig')
