@@ -7,7 +7,6 @@ import numpy as np
 
 from mldata.dataset import Dataset, Metadata
 import mldata.utils.config as cfg
-from mldata.utils.utils import buffered_iter
 
 
 def load(dset_name, version_name="baseDataset", lazy=False):
