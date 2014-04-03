@@ -1,6 +1,8 @@
 """Datasets store the data used for experiments."""
 import hashlib
 
+BUFFER_SIZE = 1000
+
 class Dataset():
     """Interface to interact with physical dataset
 
@@ -94,8 +96,11 @@ class Dataset():
 
     def _iter_with_target(self):
         """Provide an iterator when the Dataset has a target."""
-        for (ex, tg) in zip(self.data, self.targets):
-            yield (ex, tg)
+        buffer = min(BUFFER_SIZE, len(self.data))
+        for idx in range(0, len(self.data), buffer):
+            for ex, tg in zip(self.data[idx:idx+buffer],
+                              self.target[idx:idx+buffer]):
+                yield (ex,)
 
     def _get_with_target(self, key):
         """Get the entry specified by the key.
@@ -118,8 +123,10 @@ class Dataset():
 
     def _iter_without_target(self):
         """Provide an iterator when the Dataset has no target."""
-        for ex in self.data:
-            yield (ex,)
+        buffer = min(BUFFER_SIZE, len(self.data))
+        for idx in range(0, len(self.data), buffer):
+            for ex in self.data[idx:idx+buffer]:
+                yield (ex,)
 
     def _get_without_target(self, key):
         """Get the entry specified by the key.
