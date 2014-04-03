@@ -1,8 +1,6 @@
 """ Manages dataset read/write operations."""
 import os
-import itertools
 import pickle as pk
-import hashlib
 
 import h5py
 import numpy as np
@@ -24,10 +22,13 @@ def load(dset_name, version_name="baseDataset", lazy=False):
     name : str
         The name of the dataset to load. The first match from the list of
         dataset folder will be used, thus allowing private copy of a dataset.
+    version_name : str
+        If this is a special version of a dataset, use this name to indicate
+        it. Default: "baseDataset".
     lazy : bool
         If set to ``True``, the dataset will be read with ``h5py`` without
         loading the whole dataset in memory. If set to ``False``, the file is
-        mapped in memory.
+        mapped in memory. Default: False.
 
     Returns
     -------
@@ -67,7 +68,8 @@ def save(dataset, version_name="baseDataset"):
     dataset : Dataset
         The dataset to be saved.
     version_name : str
-        If this is a special version of a dataset,
+        If this is a special version of a dataset, use this name to indicate
+        it. Default: "baseDataset".
 
     """
     dset_name = dataset.meta_data.name
@@ -143,3 +145,85 @@ def _save_metadata(metadata, path, filename):
     if filename not in os.listdir(path):
         with open(os.path.join(path, filename), 'wb') as f:
             pk.dump(metadata, f, pk.HIGHEST_PROTOCOL)
+
+def CSV_importer(filepath,
+                 name,
+                 splits,
+                 target_column=None,
+                 dtype=np.float64,
+                 comments='#',
+                 delimiter=' ',
+                 converters=None,
+                 skiprows=0,
+                 usecols=None):
+    """ Import a CSV file into a ``Dataset``.
+
+    From the ``filepath`` of a CSV file (using commas), create a ``Dataset``
+    which can then be saved on disk. This importer supports only numbered
+    inputs (int, float, boolean values).
+
+    Parameters
+    ----------
+    filepath : str
+        The path of the CSV file to be imported.
+    name : str
+        The name of this dataset used to store the ``Dataset`` on disk.
+    splits : tuple of int
+        Gives the split of the dataset, like (train, valid, test). The
+        integers required is the id of the last example of a sub-dataset plus 1.
+        For example, if there is 8000 examples with 5000 in the training set,
+        2000 in the validation set and 1000 in the test set, the splits would be
+        ``(5000, 7000, 8000)``.
+    target_column : int, optional
+        The column number of the target. If no target is provided, set to
+        ``None``. Default: None.
+    dtype : data-type, optional
+        Data-type of the resulting array; default: float. If this is a record
+        data-type, the resulting array will be 1-dimensional, and each row will
+        be interpreted as an element of the array. In this case, the number of
+        columns used must match the number of fields in the data-type.
+    comments : str, optional
+        The character used to indicate the start of a comment; default: ‘#’.
+    delimiter : str, optional
+        The string used to separate values. By default, this is any whitespace.
+    converters : dict, optional
+        A dictionary mapping column number to a function that will convert that
+        column to a float. E.g., if column 0 is a date string:
+        ``converters = {0: datestr2num}``. Converters can also be used to
+        provide a default value for missing data :
+        ``converters = {3: lambda s: float(s.strip() or 0)}``. Default: None.
+    skiprows : int, optional
+        Skip the first skiprows lines; default: 0.
+    usecols : sequence, optional
+        Which columns to read, with 0 being the first. For example,
+        ``usecols = (1,4,5)`` will extract the 2nd, 5th and 6th columns. The
+        default, None, results in all columns being read.
+
+    Returns
+    -------
+    Dataset
+        A ``Dataset`` with default values for ``Metadata``.
+
+    """
+    data = np.loadtxt(filepath, dtype, comments, delimiter,
+                      converters, skiprows, usecols)
+
+    meta = Metadata()
+    meta.name = name
+    meta.splits = splits
+    assert(len(data) == splits[-1], "The dataset read is not consistent "
+                                         "with the split given.")
+    meta.nb_examples = splits[-1]
+
+    dset = None
+    if target_column is not None:
+        targets = data[:, target_column]
+        examples = data[:, list(range(0,target_column)) +
+                           list(range(target_column+1, data.shape[1]))]
+        dset = Dataset(meta, examples, targets)
+    else:
+        dset = Dataset(meta, data)
+
+    dset.meta_data.hash = dset.__hash__()
+
+    return dset
