@@ -155,18 +155,20 @@ class Metadata():
     Attributes
     ----------
     name : str
-        The name of the `Dataset`
+        The name of the `Dataset`. Default: "Default".
     nb_examples : int
-        The number of example in the dataset (including all splits).
+        The number of example in the dataset (including all splits). Default: 0.
     dictionary : Dictionary
         Gives a mapping of words (str) to id (int). Used only when the
         dataset has been saved as an array of numbers instead of text.
+        Default: None
     splits : tuple of int
-        Specifies the split used by this view of the dataset.
+        Specifies the split used by this view of the dataset. Default: ().
     preprocess : function or None
         A function that is callable on a `Dataset` to preprocess the data.
-    version : int
-        The version number of the dataset that is required.
+        Default: ``lambda x: x``.
+    hash : str
+        The hash of the linked ``Dataset``. Default: "".
 
     """
     def __init__(self):
@@ -175,7 +177,7 @@ class Metadata():
         self.dictionary = None
         self.splits = ()
         self.preprocess = lambda x: x
-        self.version = 0
+        self.hash = ""
 
 
 class Dictionary:
