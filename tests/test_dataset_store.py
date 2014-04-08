@@ -1,61 +1,50 @@
-from ipdb import set_trace as dbg
-
 import os
-import tempfile
-import hashlib
+
 import numpy as np
-import itertools
-import time
-from functools import partial
+import nose.tools as nt
 
-from numpy.testing import (assert_equal,
-                           assert_almost_equal,
-                           assert_array_equal,
-                           assert_array_almost_equal,
-                           assert_raises)
+import mldata.dataset_store as ds
+
+RND_MATRIX = np.random.rand(100,10)
 
 
-import mldata
-import mldata.dataset_store as dataset_store
+def setup_module():
+    np.savetxt("test.csv", RND_MATRIX)
 
-DATA_DIR = os.path.join(os.path.realpath(mldata.__path__[0]), "..", "tests", "data")
+def teardown_module():
+    os.remove("test.csv")
 
-def load_mnist(lazy):
-    """
-    Load mnist dataset from a hdf5 file and test if it matches mlpython's one.
-    """
-    dataset_name = 'mnist'
+def test_CSV_importer():
+    dset = ds.CSV_importer("test.csv",
+                           "test_dset",
+                           (70, 20, 10),
+                           0)
 
-    start = time.time()
-    import mlpython.datasets.store as mlstore
-    mldatasets = mlstore.get_classification_problem(dataset_name, load_to_memory= (not lazy))
-    print "mlpython version loaded ({0:.2f}sec).".format(time.time() - start)
+    nt.assert_equal(RND_MATRIX[:,1:], dset.data)
 
-    start = time.time()
-    dataset_name = os.path.join(os.environ['MLPYTHON_DATASET_REPO'], dataset_name + ".h5")
-    dataset = mldata.dataset_store.load(dataset_name, lazy=lazy)
-    print "mldata version loaded ({0:.2f}sec).".format(time.time() - start)
+def test_save_load():
+    dset = ds.CSV_importer("test.csv",
+                           "test_dset",
+                           (70, 20, 10),
+                           0)
+    ds.save(dset, "v1")
+    dset2 = ds.load("test_dset", "v1")
 
-    print "Comparing first 1000..."
-    count = 0
-    for (e1, t1), (e2,  t2) in itertools.izip(dataset, itertools.chain(*mldatasets)):
-        #print t1, t2
-        assert_array_almost_equal(e1, e2)
-        assert_equal(t1, t2)
-        
-        count += 1
-        if count >= 1000:
-            break
+    nt.assert_equal(dset.__hash__(), dset2.__hash__())
+    nt.assert_equal(dset.meta_data.name, dset2.meta_data.name)
+    nt.assert_equal(dset.meta_data.dictionary, dset2.meta_data.dictionary)
+    nt.assert_equal(dset.meta_data.nb_examples, dset2.meta_data.nb_examples)
+    nt.assert_equal(dset.meta_data.splits, dset2.meta_data.splits)
+    nt.assert_equal(dset2.meta_data.hash, dset2.__hash__())
 
+    dset2.data[0,0] = 2
 
-def test_load_mnist():
-    """
-    Load mnist dataset from a hdf5 file and test if it matches mlpython's one.
-    """
-    load_mnist(lazy=False)
+    ds.save(dset2, version_name=v2)
+    dset3 = ds.load("test_dset", "v2")
 
-def test_load_mnist_lazy():
-    """
-    Lazy load mnist dataset from a hdf5 file and test if it matches mlpython's one.
-    """
-    load_mnist(lazy=True)
+    nt.assert_not_equal(dset3.__hash__(), dset.__hash__())
+    nt.assert_equal(dset3.meta_data.hash, dset3.__hash__())
+    nt.assert_equal(dset.meta_data.name, dset3.meta_data.name)
+    nt.assert_equal(dset.meta_data.dictionary, dset3.meta_data.dictionary)
+    nt.assert_equal(dset.meta_data.nb_examples, dset3.meta_data.nb_examples)
+    nt.assert_equal(dset.meta_data.splits, dset3.meta_data.splits)
