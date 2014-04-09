@@ -68,7 +68,9 @@ def _load_config():
     """ Loads the configuration file for MLData."""
     if not os.path.exists(CONFIGFILE):
         _create_default_config()
-    return configparser.ConfigParser().read(CONFIGFILE)
+    cfg = configparser.ConfigParser()
+    cfg.read(CONFIGFILE)
+    return cfg
 
 def _create_default_config():
     """ Build and save a default config file for MLData.
