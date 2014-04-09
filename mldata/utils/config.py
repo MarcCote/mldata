@@ -85,7 +85,7 @@ def _create_default_config():
     cp['datasets'] = {}
     _save_config(cp)
     with open(CONFIGFILE, 'a') as f:
-        f.write("# Datasets path shouldn't be changed manually.")
+        f.write("# Datasets path shouldn't be changed manually.\n")
 
 def _load_path():
     """ Load the config file at the default emplacement.
