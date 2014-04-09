@@ -60,7 +60,8 @@ def dataset_exists(dataset_name):
 
 def _save_config(config):
     """ Save a config file in the default config file emplacement."""
-    config.write(expanduser("~")+'.mldataConfig')
+    with open(CONFIGFILE, 'w') as f:
+        config.write(f)
 
 
 def _load_config():
