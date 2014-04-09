@@ -1,10 +1,10 @@
 import configparser
 import os
-from os.path import expanduser
+from os.path import expanduser, join
 
 from shutil import rmtree
 
-CONFIGFILE = expanduser("~")+'.mldataConfig'
+CONFIGFILE = join(expanduser("~"), '.mldataConfig')
 
 def add_dataset(dataset_name):
     """ Add a dataset to the index."""
