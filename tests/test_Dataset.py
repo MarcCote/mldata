@@ -5,6 +5,7 @@ import copy
 from mldata.dataset import Dataset, Metadata
 
 class Dataset_test:
+    @classmethod
     def setup_class(self):
         self.dataSmall = np.random.rand(30,5)
         self.dataLarge = np.random.rand(3000, 5)
@@ -19,11 +20,11 @@ class Dataset_test:
     def test_Dataset(self):
         dset = Dataset(self.metadataS, self.dataSmall)
         nt.assert_equal(dset.meta_data, self.metadataS)
-        nt.assert_equal(dset.data, self.dataSmall)
+        nt.assert_true(np.array_equal(dset.data, self.dataSmall))
         nt.assert_is_none(dset.target)
 
         dsetS = Dataset(self.metadataS, self.dataSmall, self.targetSmall)
-        nt.assert_is_not_none(dsetL.target)
+        nt.assert_is_not_none(dsetS.target)
 
     def test_hash(self):
         nt.assert_equal(self.dsetS.__hash__(), self.dsetS.__hash__())
@@ -60,22 +61,23 @@ class Dataset_test:
                                             x.data*2)
         dset2 = Dataset(meta, self.dataSmall, self.targetSmall)
 
-        nt.assert_equal(data2, dset2.data)
+        nt.assert_true(np.array_equal(data2, dset2.data))
 
     def test_iter(self):
-        # Without targets
+        # With targets
         dt, tg = [[z[i] for z in self.dsetS] for i in [0,1]]
-        nt.assert_equal(np.array(dt), self.dataSmall)
-
+        nt.assert_true(np.array_equal(np.array(dt), self.dataSmall))
+        # Without targets
         dset = Dataset(self.metadataS, self.dataSmall)
-        nt.assert_equal(np.array([z[0] for z in dset]), self.dataSmall)
+        nt.assert_true(np.array_equal(np.array([z[0] for z in dset]),
+                                      self.dataSmall))
 
         for a,b in zip(self.dataSmall, self.dsetS):
-            nt.assert_equal(a,b)
+            nt.assert_true(np.array_equal(a,b))
 
     def test_get(self):
-        for i in range(0, len(self.dataSmall)):
-            nt.assert_equal(self.dataSmall[i],self.dsetS[i][0])
+        for i in range(len(self.dataSmall)):
+            nt.assert_true(np.array_equal(self.dataSmall[i],self.dsetS[i][0]))
 
 
 
