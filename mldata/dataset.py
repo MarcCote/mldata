@@ -32,13 +32,6 @@ class Dataset():
         assert isinstance(meta_data, Metadata)
         self.meta_data = meta_data
 
-        if targets is None:
-            self.__iter__ = self._iter_without_target
-            self.__getitem__ = self._get_with_target
-        else:
-            self.__iter__ = self._iter_with_target
-            self.__getitem__ = self._get_without_target
-
     def __len__(self):
         return self.meta_data.nb_examples
 
@@ -49,6 +42,47 @@ class Dataset():
         if self.target is not None:
             hasher.update(self.target)
         return hasher.hexdigest()[:8]
+
+    def __iter__(self):
+        """Provide an iterator when the Dataset has a target.
+
+        ..todo: retest efficiency of this buffering in python3. With zip
+                being now lazy, it might not be better than the vanilla iter.
+
+        """
+        buffer = min(BUFFER_SIZE, len(self.data))
+        if self.target is not None:
+            for idx in range(0, len(self.data), buffer):
+                for ex, tg in zip(self.data[idx:idx+buffer],
+                                  self.target[idx:idx+buffer]):
+                    yield (ex,tg)
+        else:
+            for idx in range(0, len(self.data), buffer):
+                for ex in self.data[idx:idx+buffer]:
+                    yield (ex,)
+
+    def __getitem__(self, key):
+        """Get the entry specified by the key.
+
+        Parameters
+        ----------
+        key : numpy-like key
+            The `key` can be a single integer, a slice or a tuple defining
+            coordinates. Can be treated as a NumPy key.
+
+        Returns
+        -------
+        (array_like, array_like) or (array_like,)
+            Return the element specified by the key. It can be an array or
+            simply a scalar of the type defined by the data [and target
+            arrays].
+            The returned values are put in a tuple (data, target) or (data,).
+
+        """
+        if self.target is not None:
+            return (self.data[key], self.target[key])
+        else:
+            return (self.data[key],)
 
     def get_splits(self):
         """Return the splits defined by the associated metadata.
@@ -93,59 +127,6 @@ class Dataset():
         ds = self.meta_data.preprocess(self)
         assert isinstance(ds, Dataset)
         self = ds
-
-    def _iter_with_target(self):
-        """Provide an iterator when the Dataset has a target."""
-        buffer = min(BUFFER_SIZE, len(self.data))
-        for idx in range(0, len(self.data), buffer):
-            for ex, tg in zip(self.data[idx:idx+buffer],
-                              self.target[idx:idx+buffer]):
-                yield (ex,)
-
-    def _get_with_target(self, key):
-        """Get the entry specified by the key.
-
-        Parameters
-        ----------
-        key : numpy-like key
-            The `key` can be a single integer, a slice or a tuple defining
-            coordinates. Can be treated as a NumPy key.
-
-        Returns
-        -------
-        (array_like, array_like)
-            Return the element specified by the key. It can be an array or
-            simply a scalar of the type defined by the data and target arrays.
-            The returned values are put in a tuple (data, target).
-
-        """
-        return (self.data[key], self.target[key])
-
-    def _iter_without_target(self):
-        """Provide an iterator when the Dataset has no target."""
-        buffer = min(BUFFER_SIZE, len(self.data))
-        for idx in range(0, len(self.data), buffer):
-            for ex in self.data[idx:idx+buffer]:
-                yield (ex,)
-
-    def _get_without_target(self, key):
-        """Get the entry specified by the key.
-
-        Parameters
-        ----------
-        key : numpy-like key
-            The `key` can be a single integer, a slice or a tuple defining
-            coordinates. Can be treated as a NumPy key.
-
-        Returns
-        -------
-        (array_like, )
-            Return the element specified by the key. It can be an array or
-            simply a scalar of the type defined by the data and target arrays.
-            The returned values are put in a tuple (data, ).
-
-        """
-        return (self.data[key],)
 
 
 class Metadata():
