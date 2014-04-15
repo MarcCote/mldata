@@ -226,3 +226,14 @@ def CSV_importer(filepath,
     dset.meta_data.hash = dset.__hash__()
 
     return dset
+
+def remove(name):
+    """ Remove a dataset from the datasets folder.
+
+    Parameters
+    ----------
+    name : str
+        Name of the dataset to delete.
+
+    """
+    cfg.remove_dataset(name)
