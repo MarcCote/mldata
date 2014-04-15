@@ -1,3 +1,4 @@
+""" Manages the configuration file for MLData."""
 import configparser
 import os
 from os.path import expanduser, join
