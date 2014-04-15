@@ -15,18 +15,18 @@ def teardown_module():
 
 def test_load_config():
     cf = cfg._load_config()
-    path = os.path.expanduser("~") + '/.datasets'
+    path = os.path.join(os.path.expanduser("~"), '.datasets')
 
     nt.assert_equal(path, cf['config']['path'])
     nt.assert_equal(path, cfg._load_path())
-    nt.assert_true(cp.has_section('dataset'))
+    nt.assert_true(cf.has_section('datasets'))
 
 def test_add_remove():
     cfg.add_dataset("test_dataset")
     nt.assert_true(cfg.dataset_exists("test_dataset"))
 
     nt.assert_equal(cfg.get_dataset_path("test_dataset"),
-                    os.join(cfg._load_path(), "test_dataset"))
+                    os.path.join(cfg._load_path(), "test_dataset"))
     path = cfg.get_dataset_path("test_dataset")
     nt.assert_true(os.path.isdir(path))
 

@@ -81,7 +81,10 @@ def _create_default_config():
 
     """
     cp = configparser.ConfigParser()
-    cp['config'] = {'path': expanduser("~")+'/.datasets'}
+    path = join(expanduser("~"), '.datasets')
+    if not os.path.isdir(path):
+        os.mkdir(path)
+    cp['config'] = {'path': path}
     cp['datasets'] = {}
     _save_config(cp)
     with open(CONFIGFILE, 'a') as f:
