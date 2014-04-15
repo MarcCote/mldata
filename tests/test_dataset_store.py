@@ -13,6 +13,7 @@ def setup_module():
 
 def teardown_module():
     os.remove("test.csv")
+    ds.remove("test_dset")
 
 def test_CSV_importer():
     dset = ds.CSV_importer("test.csv",
