@@ -55,12 +55,12 @@ class Dataset_test:
         nt.assert_equal(len(self.dsetS), self.dsetS.get_splits()[-1])
 
     def test_preprocess(self):
-        data2 = self.dsetS.data * 2
+        data2 = self.dataSmall * 2
         meta = copy.deepcopy(self.metadataS)
-        meta.preprocess = lambda x: Dataset(self.metadataS, x.data * 2,
-                                            x.data*2)
+        meta.preprocess = lambda x: Dataset(x.meta_data, x.data * 2,
+                                            x.target * 2)
         dset2 = Dataset(meta, self.dataSmall, self.targetSmall)
-
+        dset2 = dset2.apply()
         nt.assert_true(np.array_equal(data2, dset2.data))
 
     def test_iter(self):
