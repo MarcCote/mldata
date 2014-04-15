@@ -48,12 +48,8 @@ class Dataset():
         return hasher.hexdigest()[:8]
 
     def __iter__(self):
-        """Provide an iterator when the Dataset has a target.
-
-        ..todo: retest efficiency of this buffering in python3. With zip
-                being now lazy, it might not be better than the vanilla iter.
-
-        """
+        """Provide an iterator when the Dataset has a target."""
+        #todo: retest efficiency of this buffering in python3. With zip being now lazy, it might not be better than the vanilla iter.
         buffer = min(BUFFER_SIZE, len(self.data))
         if self.target is not None:
             for idx in range(0, len(self.data), buffer):

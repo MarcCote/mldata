@@ -1,4 +1,5 @@
 """ Manages dataset read/write operations."""
+#todo: Remove precise versions of datasets and manage dependencies.
 import os
 import pickle as pk
 
@@ -136,11 +137,8 @@ def _save_metadata(metadata, path, filename):
     path : str
     filename : str
 
-    .. todo:: A dataset could be orphaned if overwritten by another metadata
-              file. This needs to be checked in a future version.
-
     """
-
+    #todo: A dataset could be orphaned if overwritten by another metadata file. This needs to be checked in a future version.
     if filename not in os.listdir(path):
         with open(os.path.join(path, filename), 'wb') as f:
             pk.dump(metadata, f, pk.HIGHEST_PROTOCOL)
