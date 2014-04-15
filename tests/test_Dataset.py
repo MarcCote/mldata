@@ -72,9 +72,6 @@ class Dataset_test:
         nt.assert_true(np.array_equal(np.array([z[0] for z in dset]),
                                       self.dataSmall))
 
-        for a,b in zip(self.dataSmall, self.dsetS):
-            nt.assert_true(np.array_equal(a,b))
-
     def test_get(self):
         for i in range(len(self.dataSmall)):
             nt.assert_true(np.array_equal(self.dataSmall[i],self.dsetS[i][0]))
