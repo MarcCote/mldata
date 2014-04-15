@@ -161,7 +161,8 @@ class Metadata():
         Specifies the split used by this view of the dataset. Default: ().
     preprocess : function or None
         A function that is callable on a `Dataset` to preprocess the data.
-        Default: ``lambda x: x``.
+        The function cannot be a lambda function since those can't be pickled.
+        Default: identity function.
     hash : str
         The hash of the linked ``Dataset``. Default: "".
 
@@ -171,9 +172,11 @@ class Metadata():
         self.nb_examples = 0
         self.dictionary = None
         self.splits = ()
-        self.preprocess = lambda x: x
+        self.preprocess = default_preprocess
         self.hash = ""
 
+def default_preprocess(dset):
+    return dset
 
 class Dictionary:
     """Word / integer association list

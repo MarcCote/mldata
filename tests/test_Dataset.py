@@ -58,8 +58,7 @@ class Dataset_test:
     def test_preprocess(self):
         data2 = self.dataSmall * 2
         meta = copy.deepcopy(self.metadataS)
-        meta.preprocess = lambda x: Dataset(x.meta_data, x.data * 2,
-                                            x.target * 2)
+        meta.preprocess = double_dset
         dset2 = Dataset(meta, self.dataSmall, self.targetSmall)
         dset2 = dset2.apply()
         nt.assert_true(np.array_equal(data2, dset2.data))
@@ -77,5 +76,7 @@ class Dataset_test:
         for i in range(len(self.dataSmall)):
             nt.assert_true(np.array_equal(self.dataSmall[i], self.dsetS[i][0]))
 
-
+def double_dset(dset):
+    """ Basic preprocessing function. """
+    return Dataset(dset.meta_data, dset.data * 2, dset.target * 2)
 
