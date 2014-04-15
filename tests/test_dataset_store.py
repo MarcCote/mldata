@@ -37,9 +37,10 @@ def test_save_load():
     nt.assert_equal(dset.meta_data.splits, dset2.meta_data.splits)
     nt.assert_equal(dset2.meta_data.hash, dset2.__hash__())
 
-    dset2.data[0,0] = 2
+    ndata = np.array(dset2.data)
+    dset2.data = ndata * 2
 
-    ds.save(dset2, version_name=v2)
+    ds.save(dset2, version_name="v2")
     dset3 = ds.load("test_dset", "v2")
 
     nt.assert_not_equal(dset3.__hash__(), dset.__hash__())
