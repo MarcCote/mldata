@@ -38,9 +38,11 @@ class Dataset():
     def __hash__(self):
         """ Hash function used for versioning."""
         hasher = hashlib.md5()
-        hasher.update(self.data)
+        for l in self.data:
+            hasher.update(l.copy())
         if self.target is not None:
-            hasher.update(self.target)
+            for l in self.target:
+                hasher.update(l.copy())
         return hasher.hexdigest()[:8]
 
     def __iter__(self):
@@ -123,10 +125,15 @@ class Dataset():
         work on the data and the targets, leaving the rest intact. Still,
         as long as the result is still a `Dataset`, `apply` will work.
 
+        Returns
+        -------
+        Dataset
+            The preprocessed dataset.
+
         """
         ds = self.meta_data.preprocess(self)
         assert isinstance(ds, Dataset)
-        self = ds
+        return ds
 
 
 class Metadata():
