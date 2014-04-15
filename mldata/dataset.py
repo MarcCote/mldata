@@ -1,6 +1,8 @@
 """Datasets store the data used for experiments."""
 import hashlib
 
+import numpy as np
+
 BUFFER_SIZE = 1000
 
 class Dataset():
@@ -39,10 +41,10 @@ class Dataset():
         """ Hash function used for versioning."""
         hasher = hashlib.md5()
         for l in self.data:
-            hasher.update(l.copy())
+            hasher.update(np.array(l))
         if self.target is not None:
             for l in self.target:
-                hasher.update(l.copy())
+                hasher.update(np.array(l))
         return hasher.hexdigest()[:8]
 
     def __iter__(self):
