@@ -25,7 +25,7 @@ def test_CSV_importer():
 def test_save_load():
     dset = ds.CSV_importer("test.csv",
                            "test_dset",
-                           (70, 20, 10),
+                           (70, 90, 100),
                            0)
     ds.save(dset, "v1")
     dset2 = ds.load("test_dset", "v1")
