@@ -4,18 +4,19 @@ import copy
 
 from mldata.dataset import Dataset, Metadata
 
+
 class Dataset_test:
     @classmethod
     def setup_class(self):
-        self.dataSmall = np.random.rand(30,5)
+        self.dataSmall = np.random.rand(30, 5)
         self.dataLarge = np.random.rand(3000, 5)
-        self.targetSmall = np.random.rand(30,1)
-        self.targetLarge = np.random.rand(3000,1)
+        self.targetSmall = np.random.rand(30, 1)
+        self.targetLarge = np.random.rand(3000, 1)
 
         self.metadataS = Metadata()
-        self.metadataS.splits = (10,20,30)
+        self.metadataS.splits = (10, 20, 30)
         self.metadataS.nb_examples = 30
-        self.dsetS = Dataset(self.metadataS,self.dataSmall, self.targetSmall)
+        self.dsetS = Dataset(self.metadataS, self.dataSmall, self.targetSmall)
 
     def test_Dataset(self):
         dset = Dataset(self.metadataS, self.dataSmall)
@@ -41,13 +42,13 @@ class Dataset_test:
 
         meta = Metadata()
         meta.name = "AnotherName"
-        meta.splits = (10,20,30)
+        meta.splits = (10, 20, 30)
         dset4 = Dataset(meta, self.dataSmall)
         nt.assert_equal(dset4.__hash__(), dset2.__hash__())
         nt.assert_not_equal(dset4.__hash__(), dset3.__hash__())
 
     def test_get_splits(self):
-        nt.assert_equal(self.dsetS.get_splits(), (10,20,30))
+        nt.assert_equal(self.dsetS.get_splits(), (10, 20, 30))
 
     def test_len(self):
         nt.assert_equal(len(self.dsetS), len(self.dsetS.data))
@@ -65,7 +66,7 @@ class Dataset_test:
 
     def test_iter(self):
         # With targets
-        dt, tg = [[z[i] for z in self.dsetS] for i in [0,1]]
+        dt, tg = [[z[i] for z in self.dsetS] for i in [0, 1]]
         nt.assert_true(np.array_equal(np.array(dt), self.dataSmall))
         # Without targets
         dset = Dataset(self.metadataS, self.dataSmall)
@@ -74,7 +75,7 @@ class Dataset_test:
 
     def test_get(self):
         for i in range(len(self.dataSmall)):
-            nt.assert_true(np.array_equal(self.dataSmall[i],self.dsetS[i][0]))
+            nt.assert_true(np.array_equal(self.dataSmall[i], self.dsetS[i][0]))
 
 
 
