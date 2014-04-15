@@ -38,7 +38,7 @@ def load(dset_name, version_name="baseDataset", lazy=False):
     path = None
     if cfg.dataset_exists(dset_name):
         path = cfg.get_dataset_path(dset_name)
-    return _load_from_file(dset_name, path, lazy)
+    return _load_from_file(dset_name + '_' + version_name, path, lazy)
 
 def save(dataset, version_name="baseDataset"):
     """ Save the dataset, manages versions.
@@ -96,14 +96,14 @@ def _load_from_file(name, path, lazy):
         metadata = pk.load(f)
 
     dataset = None
-    file_to_load = metadata.hash + ".data"
+    file_to_load = os.path.join(path, metadata.hash + ".data")
     if lazy:
         dataset = h5py.File(file_to_load, mode='r', driver=None)
     else:
-        dataset = h5py.File(file_to_load, mode='r', driver=core)
+        dataset = h5py.File(file_to_load, mode='r', driver='core')
 
     data   = dataset['/']["data"]
-    target = dataset['/']["target"]
+    target = dataset['/']["targets"]
 
     return Dataset(metadata, data, target)
 
