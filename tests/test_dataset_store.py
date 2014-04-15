@@ -17,10 +17,10 @@ def teardown_module():
 def test_CSV_importer():
     dset = ds.CSV_importer("test.csv",
                            "test_dset",
-                           (70, 20, 10),
+                           (70, 90, 100),
                            0)
 
-    nt.assert_equal(RND_MATRIX[:,1:], dset.data)
+    nt.assert_true(np.array_equal(RND_MATRIX[:,1:], dset.data))
 
 def test_save_load():
     dset = ds.CSV_importer("test.csv",
