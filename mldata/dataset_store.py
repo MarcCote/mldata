@@ -123,9 +123,9 @@ def _save_dataset(dataset, path, filename):
     if filename not in os.listdir(path):
         fullname = os.path.join(path, filename)
         with h5py.File(fullname, mode='w') as f:
-            f.create_dataset('data', dataset.data)
-            if dataset.target is not Null:
-                f.create_dataset('targets', dataset.target)
+            f.create_dataset('data', data=dataset.data)
+            if dataset.target is not None:
+                f.create_dataset('targets', data=dataset.target)
 
 def _save_metadata(metadata, path, filename):
     """ Pickle the metadata.
