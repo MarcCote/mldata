@@ -101,8 +101,11 @@ def _load_from_file(name, path, lazy):
 
     """
     metadata = None
-    with open(os.path.join(path, name) + '.meta', 'rb') as f:
-        metadata = pk.load(f)
+    try:
+        with open(os.path.join(path, name) + '.meta', 'rb') as f:
+            metadata = pk.load(f)
+    except FileNotFoundError:
+        raise LookupError("This dataset/version pair does not exist : " + name)
 
     dataset = None
     file_to_load = os.path.join(path, metadata.hash + ".data")
