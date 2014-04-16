@@ -1,6 +1,7 @@
 import numpy as np
 import nose.tools as nt
 import copy
+from itertools import chain, accumulate
 
 from mldata.dataset import Dataset, Metadata
 
@@ -17,9 +18,10 @@ class Dataset_test:
         self.metadataS.splits = (10, 20, 30)
         self.metadataS.nb_examples = 30
         self.metadataL = Metadata()
-        self.metadataL.splits = (1000, 2000, 3000)
+        self.metadataL.splits = (1000, 1000, 1000)
         self.metadataL.nb_examples = 3000
         self.dsetS = Dataset(self.metadataS, self.dataSmall, self.targetSmall)
+        self.dsetL = Dataset(self.metadataL, self.dataLarge, self.targetLarge)
 
     def test_Dataset(self):
         dset = Dataset(self.metadataS, self.dataSmall)
@@ -51,13 +53,9 @@ class Dataset_test:
         nt.assert_equal(dset4.__hash__(), dset2.__hash__())
         nt.assert_not_equal(dset4.__hash__(), dset3.__hash__())
 
-    def test_get_splits(self):
-        nt.assert_equal(self.dsetS.get_splits(), (10, 20, 30))
-
     def test_len(self):
         nt.assert_equal(len(self.dsetS), len(self.dsetS.data))
         nt.assert_equal(len(self.dsetS), self.dsetS.meta_data.nb_examples)
-        nt.assert_equal(len(self.dsetS), self.dsetS.get_splits()[-1])
 
     def test_preprocess(self):
         data2 = self.dataSmall * 2
@@ -79,6 +77,17 @@ class Dataset_test:
     def test_get(self):
         for i in range(len(self.dataSmall)):
             nt.assert_true(np.array_equal(self.dataSmall[i], self.dsetS[i][0]))
+
+    def test_get_splits_iterators(self):
+        citer = chain.from_iterable(self.dsetS.get_splits_iterators())
+        for a, b in zip(citer, self.dsetS):
+            d1 = a[0]
+            d2 = b[0]
+            nt.assert_true(np.array_equal(d1,d2))
+
+        sp = self.dsetL.meta_data.splits
+        for splitn, it in zip(sp, self.dsetL.get_splits_iterators()):
+            nt.assert_equal(sum(1 for _ in it), splitn)
 
 def double_dset(dset):
     """ Basic preprocessing function. """

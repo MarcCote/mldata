@@ -1,4 +1,5 @@
 """Datasets store the data used for experiments."""
+from itertools import accumulate
 import hashlib
 
 import numpy as np
@@ -55,17 +56,19 @@ class Dataset():
         return hasher.hexdigest()[:8]
 
     def __iter__(self):
-        """Provide an iterator when the Dataset has a target."""
+        """Provide an iterator handling if the Dataset has a target."""
         #todo: retest efficiency of this buffering in python3. With zip being now lazy, it might not be better than the vanilla iter.
-        buffer = min(BUFFER_SIZE, len(self.data))
+        buffer = min(BUFFER_SIZE, len(self))
         if self.target is not None:
             for idx in range(0, len(self.data), buffer):
-                for ex, tg in zip(self.data[idx:idx+buffer],
-                                  self.target[idx:idx+buffer]):
+                stop = min(idx + buffer, len(self))
+                for ex, tg in zip(self.data[idx:stop],
+                                  self.target[idx:stop]):
                     yield (ex,tg)
         else:
             for idx in range(0, len(self.data), buffer):
-                for ex in self.data[idx:idx+buffer]:
+                stop = min(idx + buffer, len(self))
+                for ex in self.data[idx:stop]:
                     yield (ex,)
 
     def __getitem__(self, key):
@@ -91,36 +94,57 @@ class Dataset():
         else:
             return (self.data[key],)
 
-    def get_splits(self):
-        """Return the splits defined by the associated metadata.
+    def _split_iterators(self, start, end):
+        """ Iterate on a split.
 
-        The split is given via a tuple of integer with each integers
-        representing the integer after the last id used by this split. For
-        example::
+        Parameters
+        ----------
+        start : int
+            Id of the first element of the split.
+        end : int
+            Id of the next element after the last.
 
-            (5000, 6000, 7000)
+        """
+        buffer = min(BUFFER_SIZE, end - start)
+        if self.target is not None:
+            for idx in range(start, end, buffer):
+                stop = min(idx+buffer, end)
+                for ex, tg in zip(self.data[idx:stop],
+                                  self.target[idx:stop]):
+                    yield (ex,tg)
+        else:
+            for idx in range(start, end, buffer):
+                stop = min(idx+buffer, end)
+                for ex in self.data[idx:stop]:
+                    yield (ex,)
 
-        would give a test set of all examples from 0 to 4999, a validation
-        set of examples 5000 to 5999 and a test set of examples 6000 up to
-        6999. This means that 7000 is also the number of examples in the
-        dataset.
+    def get_splits_iterators(self):
+        """ Creates a tuple of iterator, each iterating on a split.
+
+        Each iterators returned is used to iterate over the corresponding
+        split. For example, if the ``Metadata`` specifies a ``splits`` of
+        (10, 20, 30), ``get_splits_iterators`` returns a 3-tuple with an
+        iterator for the ten first examples, another for the ten next and a
+        third for the ten lasts.
 
         Returns
         -------
-        tuple of int
-            Where each integer gives the id of the example coming after the
-            last one in a split.
-
-        Notes
-        -----
-        For now, only a tuple is accepted. Eventually, predicates over the
-        examples id could be supported.
+        tuple of iterable
+            A tuple of iterator, one for each split.
 
         """
-        if isinstance(self.meta_data.splits, tuple):
-            return self.meta_data.splits
-        else:
-            raise NotImplementedError("Only splits with tuple are supported.")
+        sp = list(self.meta_data.splits)
+
+        # normalize the splits<
+        if sum(sp) == len(self):
+            sp = list(accumulate(sp))
+        assert(sp[-1] == len(self),
+            "The splits couldn't be normalized")
+
+        itors = []
+        for start, end in zip([0] + sp, sp):
+            itors.append(self._split_iterators(start, end))
+        return itors
 
     def apply(self):
         """Apply the preprocess specified in the associated metadata.
