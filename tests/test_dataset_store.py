@@ -42,7 +42,7 @@ def test_save_load():
     dset2.data = ndata * 2
 
     ds.save(dset2, version_name="v2")
-    dset3 = ds.load("test_dset", "v2")
+    dset3 = ds.load("test_dset", "v2",lazy=True)
 
     nt.assert_not_equal(dset3.__hash__(), dset.__hash__())
     nt.assert_equal(dset3.meta_data.hash, dset3.__hash__())
