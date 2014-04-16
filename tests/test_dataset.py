@@ -16,6 +16,9 @@ class Dataset_test:
         self.metadataS = Metadata()
         self.metadataS.splits = (10, 20, 30)
         self.metadataS.nb_examples = 30
+        self.metadataL = Metadata()
+        self.metadataL.splits = (1000, 2000, 3000)
+        self.metadataL.nb_examples = 3000
         self.dsetS = Dataset(self.metadataS, self.dataSmall, self.targetSmall)
 
     def test_Dataset(self):
@@ -36,13 +39,14 @@ class Dataset_test:
         dset2 = Dataset(self.metadataS, self.dataSmall)
         nt.assert_not_equal(dset2.__hash__(), dset.__hash__())
 
-        dset3 = Dataset(self.metadataS, self.dataLarge)
+        dset3 = Dataset(self.metadataL, self.dataLarge)
         nt.assert_not_equal(dset2.__hash__(), dset3.__hash__())
         nt.assert_not_equal(dset3.__hash__(), dset.__hash__())
 
         meta = Metadata()
         meta.name = "AnotherName"
-        meta.splits = (10, 20, 30)
+        meta.splits = (10, 10, 10) # alternative split form
+        meta.nb_examples = 30
         dset4 = Dataset(meta, self.dataSmall)
         nt.assert_equal(dset4.__hash__(), dset2.__hash__())
         nt.assert_not_equal(dset4.__hash__(), dset3.__hash__())

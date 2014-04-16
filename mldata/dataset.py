@@ -29,6 +29,13 @@ class Dataset():
 
     """
     def __init__(self, meta_data, data, target=None):
+        assert(len(data) == meta_data.nb_examples,
+            "The metadata ``nb_examples`` is inconsistent with the length of "
+            "the dataset.")
+        assert(len(data) == meta_data.splits[-1] or
+               len(data) == sum(meta_data.splits),
+            "The metadata ``splits`` is inconsistent with the length of the "
+            "dataset.")
         self.data = data
         self.target = target
         assert isinstance(meta_data, Metadata)
@@ -152,11 +159,14 @@ class Metadata():
     nb_examples : int
         The number of example in the dataset (including all splits). Default: 0.
     dictionary : Dictionary
+        _Not yet implemented_
         Gives a mapping of words (str) to id (int). Used only when the
         dataset has been saved as an array of numbers instead of text.
         Default: None
     splits : tuple of int
         Specifies the split used by this view of the dataset. Default: ().
+        The numbers can be either the number of the last examples in each
+        subsets or the number of examples in each categories.
     preprocess : function or None
         A function that is callable on a `Dataset` to preprocess the data.
         The function cannot be a lambda function since those can't be pickled.

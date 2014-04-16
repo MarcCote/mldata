@@ -182,6 +182,8 @@ def CSV_importer(filepath,
         For example, if there is 8000 examples with 5000 in the training set,
         2000 in the validation set and 1000 in the test set, the splits would be
         ``(5000, 7000, 8000)``.
+        An alternative form where each numbers represent the count of each
+        subsets is also supported.
     target_column : int, optional
         The column number of the target. If no target is provided, set to
         ``None``. Default: None.
@@ -219,9 +221,10 @@ def CSV_importer(filepath,
     meta = Metadata()
     meta.name = name
     meta.splits = splits
-    assert len(data) == splits[-1], "The dataset read is not consistent with " \
-                                    "the split given."
-    meta.nb_examples = splits[-1]
+    assert(len(data) == splits[-1] or
+           len(data) == sum(splits),
+    "The dataset read is not consistent with the split given.")
+    meta.nb_examples = len(data)
 
     dset = None
     if target_column is not None:
