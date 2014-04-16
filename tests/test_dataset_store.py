@@ -50,3 +50,12 @@ def test_save_load():
     nt.assert_equal(dset.meta_data.dictionary, dset3.meta_data.dictionary)
     nt.assert_equal(dset.meta_data.nb_examples, dset3.meta_data.nb_examples)
     nt.assert_equal(dset.meta_data.splits, dset3.meta_data.splits)
+
+    # handle missing datasets
+    with nt.assert_raises(LookupError):
+        ds.load("inexistant_dataset")
+
+    with nt.assert_raises(LookupError):
+        ds.load("test_dset", "v3")
+
+
