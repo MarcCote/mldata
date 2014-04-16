@@ -7,7 +7,8 @@ import mldata.utils.config as cfg
 
 def setup_module():
     # save current config file
-    os.rename(cfg.CONFIGFILE, cfg.CONFIGFILE  +".bak")
+    if os.path.isfile(cfg.CONFIGFILE):
+        os.rename(cfg.CONFIGFILE, cfg.CONFIGFILE  +".bak")
 
 def teardown_module():
     # restore config file
