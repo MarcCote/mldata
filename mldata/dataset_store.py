@@ -35,10 +35,18 @@ def load(dset_name, version_name="baseDataset", lazy=False):
     Dataset
         Return the loaded dataset, if it exists. Else, return ``None``.
 
+    Raises
+    ------
+    LookupError
+        If the dataset ``dset_name`` does not exist, a ``LookupError`` is
+        raised.
+
     """
     path = None
     if cfg.dataset_exists(dset_name):
         path = cfg.get_dataset_path(dset_name)
+    else:
+        raise LookupError("This dataset does not exist.")
     return _load_from_file(dset_name + '_' + version_name, path, lazy)
 
 def save(dataset, version_name="baseDataset"):
