@@ -76,7 +76,7 @@ def _load_config():
 def _create_default_config():
     """ Build and save a default config file for MLData.
 
-    The default config is saved as ``.MLDataConfig`` in the ``$HOME`` folder
+    The default config is saved as ``.mldataConfig`` in the ``$HOME`` folder
     or its equivalent. It stores the emplacement of dataset files and make an
     index of accessible datasets.
 
