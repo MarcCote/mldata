@@ -107,17 +107,23 @@ def _load_from_file(name, path, lazy):
     except FileNotFoundError:
         raise LookupError("This dataset/version pair does not exist : " + name)
 
-    dataset = None
+    datasetFile = None
     file_to_load = os.path.join(path, metadata.hash + ".data")
     if lazy:
-        dataset = h5py.File(file_to_load, mode='r', driver=None)
+        datasetFile = h5py.File(file_to_load, mode='r', driver=None)
     else:
-        dataset = h5py.File(file_to_load, mode='r', driver='core')
+        datasetFile = h5py.File(file_to_load, mode='r', driver='core')
 
-    data   = dataset['/']["data"]
-    target = dataset['/']["targets"]
+    data   = datasetFile['/']["data"]
+    target = None
+    try:
+        target = datasetFile['/']["targets"]
+    except:
+        pass
 
-    return Dataset(metadata, data, target)
+    dset = Dataset(metadata, data, target)
+    dset._fileHandle = h5pyFileWrapper(datasetFile)
+    return dset
 
 def _save_dataset(dataset, path, filename):
     """Call to ``h5py`` to write the dataset
@@ -249,3 +255,12 @@ def remove(name):
 
     """
     cfg.remove_dataset(name)
+
+class h5pyFileWrapper:
+    """ Used to close handle when a ``Dataset`` is destroyed."""
+
+    def __init__(self, file):
+        self.file = file
+
+    def __del__(self):
+        self.file.close()

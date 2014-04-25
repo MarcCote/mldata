@@ -28,8 +28,13 @@ def test_save_load():
                            "test_dset",
                            (70, 90, 100),
                            0)
+    dset_nt = ds.CSV_importer("test.csv",
+                              "test_dset",
+                              (70,90,100))
     ds.save(dset, "v1")
+    ds.save(dset_nt, "noTarget")
     dset2 = ds.load("test_dset", "v1")
+    dset_nt2 = ds.load("test_dset", "noTarget")
 
     nt.assert_equal(dset.__hash__(), dset2.__hash__())
     nt.assert_equal(dset.meta_data.name, dset2.meta_data.name)
@@ -57,5 +62,7 @@ def test_save_load():
 
     with nt.assert_raises(LookupError):
         ds.load("test_dset", "v3")
+
+    nt.assert_is_none(dset_nt2.target)
 
 
