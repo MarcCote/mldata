@@ -221,9 +221,9 @@ def CSV_importer(filepath,
     meta = Metadata()
     meta.name = name
     meta.splits = splits
-    assert(len(data) == splits[-1] or
-           len(data) == sum(splits),
-    "The dataset read is not consistent with the split given.")
+    assert len(data) == splits[-1] or \
+           len(data) == sum(splits),\
+           "The dataset read is not consistent with the split given."
     meta.nb_examples = len(data)
 
     dset = None
