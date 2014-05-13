@@ -82,7 +82,7 @@ class Dataset_test:
         citer = chain.from_iterable(self.dsetS.get_splits_iterators())
         for a, b in zip(citer, self.dsetS):
             d1 = a[0]
-            d2 = b[0]
+            d2 = [b[0]]
             nt.assert_true(np.array_equal(d1,d2))
 
         sp = self.dsetL.meta_data.splits

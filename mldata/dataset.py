@@ -94,7 +94,7 @@ class Dataset():
         else:
             return (self.data[key],)
 
-    def _split_iterators(self, start, end):
+    def _split_iterators(self, start, end, minibatch_size=1):
         """ Iterate on a split.
 
         Parameters
@@ -109,16 +109,17 @@ class Dataset():
         if self.target is not None:
             for idx in range(start, end, buffer):
                 stop = min(idx+buffer, end)
-                for ex, tg in zip(self.data[idx:stop],
-                                  self.target[idx:stop]):
-                    yield (ex,tg)
+                for i in range(idx, stop, minibatch_size):
+                    j = min(stop, i+minibatch_size)
+                    yield (self.data[i:j], self.target[i:j])
         else:
             for idx in range(start, end, buffer):
                 stop = min(idx+buffer, end)
-                for ex in self.data[idx:stop]:
-                    yield (ex,)
+                for i in range(idx, stop, minibatch_size):
+                    j = min(stop, i+minibatch_size)
+                    yield (self.data[i:j],)
 
-    def get_splits_iterators(self):
+    def get_splits_iterators(self, minibatch_size=1):
         """ Creates a tuple of iterator, each iterating on a split.
 
         Each iterators returned is used to iterate over the corresponding
@@ -126,6 +127,11 @@ class Dataset():
         (10, 20, 30), ``get_splits_iterators`` returns a 3-tuple with an
         iterator for the ten first examples, another for the ten next and a
         third for the ten lasts.
+
+        Parameters
+        ----------
+        minibatch_size : int
+            The size of minibatches received each iteration.
 
         Returns
         -------
@@ -135,7 +141,7 @@ class Dataset():
         """
         sp = list(self.meta_data.splits)
 
-        # normalize the splits<
+        # normalize the splits
         if sum(sp) == len(self):
             sp = list(accumulate(sp))
         assert(sp[-1] == len(self),
@@ -143,7 +149,7 @@ class Dataset():
 
         itors = []
         for start, end in zip([0] + sp, sp):
-            itors.append(self._split_iterators(start, end))
+            itors.append(self._split_iterators(start, end, minibatch_size))
         return itors
 
     def apply(self):
