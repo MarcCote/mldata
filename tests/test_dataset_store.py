@@ -3,17 +3,19 @@ import os
 import numpy as np
 import nose.tools as nt
 
-import mldata.dataset_store as ds
+import SMARTdata.mldata.dataset_store as ds
 
-RND_MATRIX = np.random.rand(100,10)
+RND_MATRIX = np.random.random((100, 10))
 
 
 def setup_module():
     np.savetxt("test.csv", RND_MATRIX)
 
+
 def teardown_module():
     os.remove("test.csv")
     ds.remove("test_dset")
+
 
 def test_CSV_importer():
     dset = ds.CSV_importer("test.csv",
@@ -21,7 +23,8 @@ def test_CSV_importer():
                            (70, 90, 100),
                            0)
 
-    nt.assert_true(np.array_equal(RND_MATRIX[:,1:], dset.data))
+    nt.assert_true(np.array_equal(RND_MATRIX[:, 1:], dset.data))
+
 
 def test_save_load():
     dset = ds.CSV_importer("test.csv",
@@ -30,7 +33,7 @@ def test_save_load():
                            0)
     dset_nt = ds.CSV_importer("test.csv",
                               "test_dset",
-                              (70,90,100))
+                              (70, 90, 100))
     ds.save(dset, "v1")
     ds.save(dset_nt, "noTarget")
     dset2 = ds.load("test_dset", "v1")

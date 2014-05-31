@@ -6,8 +6,8 @@ import pickle as pk
 import h5py
 import numpy as np
 
-from mldata.dataset import Dataset, Metadata
-import mldata.utils.config as cfg
+from SMARTdata.mldata.utils import config as cfg
+from SMARTdata.mldata.dataset import Dataset, Metadata
 
 
 def load(dset_name, version_name="baseDataset", lazy=False):
@@ -48,6 +48,7 @@ def load(dset_name, version_name="baseDataset", lazy=False):
     else:
         raise LookupError("This dataset does not exist.")
     return _load_from_file(dset_name + '_' + version_name, path, lazy)
+
 
 def save(dataset, version_name="baseDataset"):
     """ Save the dataset, manages versions.
@@ -96,6 +97,7 @@ def save(dataset, version_name="baseDataset"):
     meta_file = dset_name + '_' + version_name + ".meta"
     _save_metadata(dataset.meta_data, dset_path, meta_file)
 
+
 def _load_from_file(name, path, lazy):
     """ Call to ``h5py`` to load the file.
 
@@ -114,16 +116,16 @@ def _load_from_file(name, path, lazy):
     else:
         datasetFile = h5py.File(file_to_load, mode='r', driver='core')
 
-    data   = datasetFile['/']["data"]
+    data = datasetFile['/']["data"]
     target = None
     try:
         target = datasetFile['/']["targets"]
     except:
         pass
-
     dset = Dataset(metadata, data, target)
     dset._fileHandle = h5pyFileWrapper(datasetFile)
     return dset
+
 
 def _save_dataset(dataset, path, filename):
     """Call to ``h5py`` to write the dataset
@@ -145,6 +147,7 @@ def _save_dataset(dataset, path, filename):
             if dataset.target is not None:
                 f.create_dataset('targets', data=dataset.target)
 
+
 def _save_metadata(metadata, path, filename):
     """ Pickle the metadata.
 
@@ -159,6 +162,7 @@ def _save_metadata(metadata, path, filename):
     if filename not in os.listdir(path):
         with open(os.path.join(path, filename), 'wb') as f:
             pk.dump(metadata, f, pk.HIGHEST_PROTOCOL)
+
 
 def CSV_importer(filepath,
                  name,
@@ -234,7 +238,7 @@ def CSV_importer(filepath,
 
     dset = None
     if target_column is not None:
-        targets = data[:, target_column]
+        targets = data[:, target_column].reshape((1, -1))
         examples = data[:, list(range(0,target_column)) +
                            list(range(target_column+1, data.shape[1]))]
         dset = Dataset(meta, examples, targets)
@@ -244,6 +248,7 @@ def CSV_importer(filepath,
     dset.meta_data.hash = dset.__hash__()
 
     return dset
+
 
 def remove(name):
     """ Remove a dataset from the datasets folder.
@@ -256,9 +261,9 @@ def remove(name):
     """
     cfg.remove_dataset(name)
 
+
 class h5pyFileWrapper:
     """ Used to close handle when a ``Dataset`` is destroyed."""
-
     def __init__(self, file):
         self.file = file
 

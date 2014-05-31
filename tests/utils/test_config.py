@@ -1,18 +1,20 @@
 import os
 
-import configparser as cp
 import nose.tools as nt
 
-import mldata.utils.config as cfg
+from SMARTdata.mldata.utils import config as cfg
+
 
 def setup_module():
     # save current config file
     if os.path.isfile(cfg.CONFIGFILE):
-        os.rename(cfg.CONFIGFILE, cfg.CONFIGFILE  +".bak")
+        os.rename(cfg.CONFIGFILE, cfg.CONFIGFILE + ".bak")
+
 
 def teardown_module():
     # restore config file
-    os.rename(cfg.CONFIGFILE  +".bak", cfg.CONFIGFILE)
+    os.rename(cfg.CONFIGFILE + ".bak", cfg.CONFIGFILE)
+
 
 def test_load_config():
     cf = cfg._load_config()
@@ -21,6 +23,7 @@ def test_load_config():
     nt.assert_equal(path, cf['config']['path'])
     nt.assert_equal(path, cfg._load_path())
     nt.assert_true(cf.has_section('datasets'))
+
 
 def test_add_remove():
     cfg.add_dataset("test_dataset")

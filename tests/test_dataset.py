@@ -1,18 +1,19 @@
+import copy
+from itertools import chain
+
 import numpy as np
 import nose.tools as nt
-import copy
-from itertools import chain, accumulate
 
-from mldata.dataset import Dataset, Metadata
+from SMARTdata.mldata.dataset import Dataset, Metadata
 
 
 class Dataset_test:
     @classmethod
     def setup_class(self):
-        self.dataSmall = np.random.rand(30, 5)
-        self.dataLarge = np.random.rand(3000, 5)
-        self.targetSmall = np.random.rand(30, 1)
-        self.targetLarge = np.random.rand(3000, 1)
+        self.dataSmall = np.random.random((30, 5))
+        self.dataLarge = np.random.random((3000, 5))
+        self.targetSmall = np.random.random((30, 1))
+        self.targetLarge = np.random.random((3000, 1))
 
         self.metadataS = Metadata()
         self.metadataS.splits = (10, 20, 30)
@@ -88,6 +89,7 @@ class Dataset_test:
         sp = self.dsetL.meta_data.splits
         for splitn, it in zip(sp, self.dsetL.get_splits_iterators()):
             nt.assert_equal(sum(1 for _ in it), splitn)
+
 
 def double_dset(dset):
     """ Basic preprocessing function. """
