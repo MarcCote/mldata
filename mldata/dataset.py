@@ -6,6 +6,7 @@ import numpy as np
 
 BUFFER_SIZE = 1000
 
+
 class Dataset():
     """Interface to interact with physical dataset
 
@@ -30,16 +31,15 @@ class Dataset():
 
     """
     def __init__(self, meta_data, data, target=None):
-        assert(len(data) == meta_data.nb_examples,
-            "The metadata ``nb_examples`` is inconsistent with the length of "
-            "the dataset.")
-        assert(len(data) == meta_data.splits[-1] or
-               len(data) == sum(meta_data.splits),
-            "The metadata ``splits`` is inconsistent with the length of the "
-            "dataset.")
+        assert len(data) == meta_data.nb_examples,\
+            "The metadata ``nb_examples`` is inconsistent with the length of "\
+            "the dataset."
+        assert len(data) == meta_data.splits[-1] or\
+            len(data) == sum(meta_data.splits),\
+            "The metadata ``splits`` is inconsistent with the length of "\
+            "the dataset."
         self.data = data
         self.target = target
-        assert isinstance(meta_data, Metadata)
         self.meta_data = meta_data
 
     def __len__(self):
@@ -59,17 +59,20 @@ class Dataset():
         """Provide an iterator handling if the Dataset has a target."""
         #todo: retest efficiency of this buffering in python3. With zip being now lazy, it might not be better than the vanilla iter.
         buffer = min(BUFFER_SIZE, len(self))
-        if self.target is not None:
-            for idx in range(0, len(self.data), buffer):
-                stop = min(idx + buffer, len(self))
-                for ex, tg in zip(self.data[idx:stop],
-                                  self.target[idx:stop]):
-                    yield (ex,tg)
-        else:
-            for idx in range(0, len(self.data), buffer):
-                stop = min(idx + buffer, len(self))
-                for ex in self.data[idx:stop]:
-                    yield (ex,)
+
+        # Cycle infinitely
+        while True:
+            if self.target is not None:
+                for idx in range(0, len(self.data), buffer):
+                    stop = min(idx + buffer, len(self))
+                    for ex, tg in zip(self.data[idx:stop],
+                                      self.target[idx:stop]):
+                        yield (ex, tg)
+            else:
+                for idx in range(0, len(self.data), buffer):
+                    stop = min(idx + buffer, len(self))
+                    for ex in self.data[idx:stop]:
+                        yield (ex,)
 
     def __getitem__(self, key):
         """Get the entry specified by the key.
@@ -106,18 +109,21 @@ class Dataset():
 
         """
         buffer = min(BUFFER_SIZE, end - start)
-        if self.target is not None:
-            for idx in range(start, end, buffer):
-                stop = min(idx+buffer, end)
-                for i in range(idx, stop, minibatch_size):
-                    j = min(stop, i+minibatch_size)
-                    yield (self.data[i:j], self.target[i:j])
-        else:
-            for idx in range(start, end, buffer):
-                stop = min(idx+buffer, end)
-                for i in range(idx, stop, minibatch_size):
-                    j = min(stop, i+minibatch_size)
-                    yield (self.data[i:j],)
+
+        # Cycle infinitely
+        while True:
+            if self.target is not None:
+                for idx in range(start, end, buffer):
+                    stop = min(idx+buffer, end)
+                    for i in range(idx, stop, minibatch_size):
+                        j = min(stop, i+minibatch_size)
+                        yield (self.data[i:j], self.target[i:j].reshape((1, -1)))
+            else:
+                for idx in range(start, end, buffer):
+                    stop = min(idx+buffer, end)
+                    for i in range(idx, stop, minibatch_size):
+                        j = min(stop, i+minibatch_size)
+                        yield (self.data[i:j],)
 
     def get_splits_iterators(self, minibatch_size=1):
         """ Creates a tuple of iterator, each iterating on a split.
@@ -144,8 +150,7 @@ class Dataset():
         # normalize the splits
         if sum(sp) == len(self):
             sp = list(accumulate(sp))
-        assert(sp[-1] == len(self),
-            "The splits couldn't be normalized")
+        assert sp[-1] == len(self), "The splits couldn't be normalized"
 
         itors = []
         for start, end in zip([0] + sp, sp):
