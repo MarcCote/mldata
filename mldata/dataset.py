@@ -60,19 +60,17 @@ class Dataset():
         #todo: retest efficiency of this buffering in python3. With zip being now lazy, it might not be better than the vanilla iter.
         buffer = min(BUFFER_SIZE, len(self))
 
-        # Cycle infinitely
-        while True:
-            if self.target is not None:
-                for idx in range(0, len(self.data), buffer):
-                    stop = min(idx + buffer, len(self))
-                    for ex, tg in zip(self.data[idx:stop],
-                                      self.target[idx:stop]):
-                        yield (ex, tg)
-            else:
-                for idx in range(0, len(self.data), buffer):
-                    stop = min(idx + buffer, len(self))
-                    for ex in self.data[idx:stop]:
-                        yield (ex,)
+        if self.target is not None:
+            for idx in range(0, len(self.data), buffer):
+                stop = min(idx + buffer, len(self))
+                for ex, tg in zip(self.data[idx:stop],
+                                  self.target[idx:stop]):
+                    yield (ex, tg)
+        else:
+            for idx in range(0, len(self.data), buffer):
+                stop = min(idx + buffer, len(self))
+                for ex in self.data[idx:stop]:
+                    yield (ex,)
 
     def __getitem__(self, key):
         """Get the entry specified by the key.
@@ -93,9 +91,9 @@ class Dataset():
 
         """
         if self.target is not None:
-            return (self.data[key], self.target[key])
+            return self.data[key], self.target[key]
         else:
-            return (self.data[key],)
+            return self.data[key],
 
     def _split_iterators(self, start, end, minibatch_size=1):
         """ Iterate on a split.
@@ -110,20 +108,18 @@ class Dataset():
         """
         buffer = min(BUFFER_SIZE, end - start)
 
-        # Cycle infinitely
-        while True:
-            if self.target is not None:
-                for idx in range(start, end, buffer):
-                    stop = min(idx+buffer, end)
-                    for i in range(idx, stop, minibatch_size):
-                        j = min(stop, i+minibatch_size)
-                        yield (self.data[i:j], self.target[i:j].reshape((1, -1)))
-            else:
-                for idx in range(start, end, buffer):
-                    stop = min(idx+buffer, end)
-                    for i in range(idx, stop, minibatch_size):
-                        j = min(stop, i+minibatch_size)
-                        yield (self.data[i:j],)
+        if self.target is not None:
+            for idx in range(start, end, buffer):
+                stop = min(idx+buffer, end)
+                for i in range(idx, stop, minibatch_size):
+                    j = min(stop, i+minibatch_size)
+                    yield (self.data[i:j], self.target[i:j].reshape((1, -1)))
+        else:
+            for idx in range(start, end, buffer):
+                stop = min(idx+buffer, end)
+                for i in range(idx, stop, minibatch_size):
+                    j = min(stop, i+minibatch_size)
+                    yield (self.data[i:j],)
 
     def get_splits_iterators(self, minibatch_size=1):
         """ Creates a tuple of iterator, each iterating on a split.
