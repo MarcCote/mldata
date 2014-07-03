@@ -2,7 +2,7 @@ import os
 
 import nose.tools as nt
 
-from SMARTdata.mldata.utils import config as cfg
+from mldata.utils import config as cfg
 
 
 def setup_module():

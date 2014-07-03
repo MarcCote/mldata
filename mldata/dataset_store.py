@@ -6,8 +6,8 @@ import pickle as pk
 import h5py
 import numpy as np
 
-from SMARTdata.mldata.utils import config as cfg
-from SMARTdata.mldata.dataset import Dataset, Metadata
+from mldata.utils import config as cfg
+from mldata.dataset import Dataset, Metadata
 
 
 def load(dset_name, version_name="baseDataset", lazy=False):

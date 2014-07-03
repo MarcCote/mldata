@@ -4,7 +4,7 @@ from itertools import chain
 import numpy as np
 import nose.tools as nt
 
-from SMARTdata.mldata.dataset import Dataset, Metadata
+from mldata.dataset import Dataset, Metadata
 
 
 class Dataset_test:

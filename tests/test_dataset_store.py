@@ -3,7 +3,7 @@ import os
 import numpy as np
 import nose.tools as nt
 
-import SMARTdata.mldata.dataset_store as ds
+import mldata.dataset_store as ds
 
 RND_MATRIX = np.random.random((100, 10))
 
