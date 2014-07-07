@@ -141,17 +141,33 @@ class Dataset():
             A tuple of iterator, one for each split.
 
         """
-        sp = list(self.meta_data.splits)
+        sp = self._normalize_splits()
 
-        # normalize the splits
-        if sum(sp) == len(self):
-            sp = list(accumulate(sp))
-        assert sp[-1] == len(self), "The splits couldn't be normalized"
-
-        itors = []
-        for start, end in zip([0] + sp, sp):
-            itors.append(self._split_iterators(start, end, minibatch_size))
+        itors = [self._split_iterators(start, end, minibatch_size) for
+                 (start, end) in zip([0] + sp, sp)]
         return itors
+
+    def get_splits(self):
+        """ Get the datasets arrays.
+
+        WARNING : This method will try to load the entire dataset in memory.
+
+        Returns
+        -------
+        tuple of tuple of array
+            The data and targets sliced in multiple subarrays.
+            ``((data1, target1), (data2, target2), ...)``
+
+        """
+        sp = self._normalize_splits()
+        indices = zip([0]+sp, sp)
+
+        if self.target is not None:
+            return tuple((self.data[slice(*s)], self.target[slice(*s)])
+                         for s in indices)
+        else:
+            return tuple((self.data[slice(*s)],) for s in indices)
+
 
     def apply(self):
         """Apply the preprocess specified in the associated metadata.
@@ -170,6 +186,16 @@ class Dataset():
         ds = self.meta_data.preprocess(self)
         assert isinstance(ds, Dataset)
         return ds
+
+    def _normalize_splits(self):
+        sp = list(self.meta_data.splits)
+
+        # normalize the splits
+        if sum(sp) == len(self):
+            sp = list(accumulate(sp))
+        assert sp[-1] == len(self), "The splits couldn't be normalized"
+
+        return sp
 
 
 class Metadata():
@@ -214,8 +240,10 @@ class Metadata():
         self.preprocess = default_preprocess
         self.hash = ""
 
+
 def default_preprocess(dset):
     return dset
+
 
 class Dictionary:
     """Word / integer association list
