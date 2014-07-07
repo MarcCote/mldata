@@ -238,8 +238,8 @@ def CSV_importer(filepath,
 
     dset = None
     if target_column is not None:
-        targets = data[:, target_column].reshape((1, -1))
-        examples = data[:, list(range(0,target_column)) +
+        targets = data[:, target_column].reshape((-1, 1))
+        examples = data[:, list(range(0, target_column)) +
                            list(range(target_column+1, data.shape[1]))]
         dset = Dataset(meta, examples, targets)
     else:
