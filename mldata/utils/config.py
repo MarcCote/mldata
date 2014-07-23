@@ -80,6 +80,8 @@ def _load_config():
     """
     if not os.path.exists(CONFIG_FILE):
         config = _create_default_config()
+        if not os.path.exists(DATASETS_DIR):
+            os.mkdir(DATASETS_DIR)
         _save_config(config)
         return config
 
