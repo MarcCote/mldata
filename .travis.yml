@@ -12,4 +12,5 @@ install:
 
 # command to run tests, e.g. python setup.py test
 script:
+  - export HOME=`pwd`
   - nosetests -v

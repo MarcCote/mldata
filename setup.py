@@ -13,7 +13,7 @@ setup(name="mldata",
       description="A library to manage machine learning datasets.",
       long_description=open('README.txt').read(),
 
-      install_requires=['numpy>=1.5.0', 'h5py'],
+      install_requires=['numpy>=1.7.0', 'h5py'],
       tests_require=['nose'],
       test_suite="nose.collector",
       )

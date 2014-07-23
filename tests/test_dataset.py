@@ -48,7 +48,7 @@ class Dataset_test:
 
         meta = Metadata()
         meta.name = "AnotherName"
-        meta.splits = (10, 10, 10) # alternative split form
+        meta.splits = (10, 10, 10)  # alternative split form
         meta.nb_examples = 30
         dset4 = Dataset(meta, self.dataSmall)
         nt.assert_equal(dset4.__hash__(), dset2.__hash__())
@@ -84,7 +84,7 @@ class Dataset_test:
         for a, b in zip(citer, self.dsetS):
             d1 = a[0]
             d2 = [b[0]]
-            nt.assert_true(np.array_equal(d1,d2))
+            nt.assert_true(np.array_equal(d1, d2))
 
         sp = self.dsetL.meta_data.splits
         for splitn, it in zip(sp, self.dsetL.get_splits_iterators()):
@@ -94,4 +94,3 @@ class Dataset_test:
 def double_dset(dset):
     """ Basic preprocessing function. """
     return Dataset(dset.meta_data, dset.data * 2, dset.target * 2)
-
